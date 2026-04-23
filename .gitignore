@@ -1,5 +1,6 @@
 venv/
 pycache/
 .vscode/
+*.sqlite3
 *.pyc
 "@
