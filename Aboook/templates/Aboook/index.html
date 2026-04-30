@@ -12,37 +12,45 @@
     </section>
 
     <div class="container my-5">
+        <h2 class="text-center mb-4">Книги для обмена</h2>
+        
         <div class="row g-4">
-            <div class="col-12 col-md-6 col-lg-4">
-                <div class="card h-100 shadow-sm">
-                    <img src="https://placehold.co/600x400/2c3e50/ffffff?text=Мастер+и+Маргарита" class="card-img-top" alt="Книга">
-                    <div class="card-body">
-                        <h5 class="card-title">Мастер и Маргарита</h5>
-                        <p class="card-text">Михаил Булгаков. Роман о любви и дьяволиаде.</p>
-                        <a href="#" class="btn btn-outline-warning">Подробнее</a>
+            {% for book in books %}
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm">
+                        <img src="https://placehold.co/600x400/2c3e50/ffffff?text={{ book.title|urlencode }}" 
+                             class="card-img-top" 
+                             alt="{{ book.title }}">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">{{ book.title }}</h5>
+                            <p class="card-text text-secondary">
+                                <small>Автор: {{ book.author }}</small>
+                            </p>
+                            <p class="card-text">
+                                {{ book.description|truncatewords:20 }}
+                            </p>
+                            <p class="card-text">
+                                {% if book.price == 0 %}
+                                    <span class="badge bg-success">Бесплатный обмен</span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark">{{ book.price }} ₽</span>
+                                {% endif %}
+                                <small class="text-secondary ms-2">Год: {{ book.year }}</small>
+                            </p>
+                            <div class="mt-auto">
+                                <a href="#" class="btn btn-outline-warning w-100">Подробнее</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-12 col-md-6 col-lg-4">
-                <div class="card h-100 shadow-sm">
-                    <img src="https://placehold.co/600x400/34495e/f1c40f?text=451+градус" class="card-img-top" alt="Книга">
-                    <div class="card-body">
-                        <h5 class="card-title">451 градус по Фаренгейту</h5>
-                        <p class="card-text">Рэй Брэдбери. Антиутопия о мире без книг.</p>
-                        <a href="#" class="btn btn-outline-warning">Подробнее</a>
+            {% empty %}
+                <div class="col-12">
+                    <div class="alert alert-info text-center py-5">
+                        <h4>К сожалению, книг пока нет</h4>
+                        <p>Заходите позже! Мы постоянно пополняем нашу библиотеку.</p>
                     </div>
                 </div>
-            </div>
-            <div class="col-12 col-md-6 col-lg-4">
-                <div class="card h-100 shadow-sm">
-                    <img src="https://placehold.co/600x400/1abc9c/2c3e50?text=Три+товарища" class="card-img-top" alt="Книга">
-                    <div class="card-body">
-                        <h5 class="card-title">Три товарища</h5>
-                        <p class="card-text">Эрих Ремарк. Роман о дружбе и любви.</p>
-                        <a href="#" class="btn btn-outline-warning">Подробнее</a>
-                    </div>
-                </div>
-            </div>
+            {% endfor %}
         </div>
     </div>
 {% endblock %}
