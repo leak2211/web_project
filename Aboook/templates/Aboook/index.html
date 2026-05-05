@@ -12,7 +12,12 @@
     </section>
 
     <div class="container my-5">
-        <h2 class="text-center mb-4">Книги для обмена</h2>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Книги для обмена</h2>
+            <a href="{% url 'book_create' %}" class="btn btn-success">
+                + Добавить книгу
+            </a>
+        </div>
         
         <div class="row g-4">
             {% for book in books %}
