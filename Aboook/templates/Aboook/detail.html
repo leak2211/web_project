@@ -37,9 +37,14 @@
                             <h5>Описание</h5>
                             <p class="card-text">{{ book.description }}</p>
                             
-                            <a href="{% url 'home' %}" class="btn btn-outline-secondary mt-3">
-                                ← Назад к списку книг
-                            </a>
+                            <div class="d-flex gap-2 mt-3">
+                                <a href="{% url 'home' %}" class="btn btn-outline-secondary">
+                                    Назад к списку книг
+                                </a>
+                                <a href="{% url 'book_edit' book.pk %}" class="btn btn-warning">
+                                     Редактировать
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
