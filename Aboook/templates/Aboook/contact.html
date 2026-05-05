@@ -1,0 +1,70 @@
+{% extends 'Aboook/base.html' %}
+
+{% block title %}Контакты - Aboook{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning text-dark">
+                    <h3 class="mb-0">Свяжитесь с нами</h3>
+                </div>
+                <div class="card-body">
+                    <p class="lead">Есть вопросы или предложения? Заполните форму ниже, и мы ответим вам в ближайшее время.</p>
+                    
+                    <hr>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="id_subject" class="form-label">Тема</label>
+                            {{ form.subject }}
+                            {% if form.subject.errors %}
+                                <div class="text-danger small">{{ form.subject.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="id_email" class="form-label">Email</label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                <div class="text-danger small">{{ form.email.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="id_text" class="form-label">Сообщение</label>
+                            {{ form.text }}
+                            {% if form.text.errors %}
+                                <div class="text-danger small">{{ form.text.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <button type="submit" class="btn btn-warning btn-lg w-100">
+                            Отправить сообщение
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            
+            <div class="row mt-4">
+                <div class="col-md-4 text-center">
+                    <i class="bi bi-envelope fs-1 text-warning"></i>
+                    <p class="mt-2">info@aboook.ru</p>
+                </div>
+                <div class="col-md-4 text-center">
+                    <i class="bi bi-telegram fs-1 text-warning"></i>
+                    <p class="mt-2">@Aboook_support</p>
+                </div>
+                <div class="col-md-4 text-center">
+                    <i class="bi bi-clock fs-1 text-warning"></i>
+                    <p class="mt-2">Ежедневно: 10:00 - 20:00</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
