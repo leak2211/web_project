@@ -3,7 +3,7 @@ from django.http import HttpResponseRedirect
 from django.contrib.auth import login as auth_login
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
-from .models import Book
+from .models import Book,Tag
 from .forms import FeedbackForm, BookForm
 
 
@@ -54,11 +54,12 @@ def contact(request):
 @login_required
 def book_create(request):
     if request.method == 'POST':
-        form = BookForm(request.POST)
+        form = BookForm(request.POST, request.FILES)  
         if form.is_valid():
-            book = form.save(commit=False) 
-            book.owner = request.user       
-            book.save()                    
+            book = form.save(commit=False)
+            book.owner = request.user
+            book.save()
+            form.save_m2m()  
             return redirect('book_detail', pk=book.pk)
     else:
         form = BookForm()
@@ -78,7 +79,7 @@ def book_edit(request, pk):
         return redirect('book_detail', pk=pk)
     
     if request.method == 'POST':
-        form = BookForm(request.POST, instance=book)
+        form = BookForm(request.POST, request.FILES, instance=book)  
         if form.is_valid():
             book = form.save()
             return redirect('book_detail', pk=book.pk)
@@ -108,3 +109,13 @@ def register(request):
         'form': form,
     }
     return render(request, 'registration/register.html', context)
+
+def books_by_tag(request, tag_id):
+    tag = get_object_or_404(Tag, pk=tag_id)
+    books = tag.books.all()
+    context = {
+        'title': f'Книги с тегом: {tag.name}',
+        'books': books,
+        'current_tag': tag,
+    }
+    return render(request, 'Aboook/index.html', context)

@@ -1,5 +1,7 @@
 from django import forms
-from .models import Book   
+from .models import Book  
+from django import forms
+from .models import Book, Tag 
 
 class FeedbackForm(forms.Form):
     subject = forms.CharField(
@@ -30,7 +32,7 @@ class FeedbackForm(forms.Form):
 class BookForm(forms.ModelForm):
     class Meta:
         model = Book
-        fields = ['title', 'author', 'description', 'year', 'price']
+        fields = ['title', 'author', 'description', 'year', 'price', 'image', 'tags']
         
         widgets = {
             'title': forms.TextInput(attrs={
@@ -55,6 +57,13 @@ class BookForm(forms.ModelForm):
                 'placeholder': 'Цена (0 - для бесплатного обмена)',
                 'step': '0.01'
             }),
+            'image': forms.ClearableFileInput(attrs={
+                'class': 'form-control'
+            }),
+            'tags': forms.SelectMultiple(attrs={
+                'class': 'form-control',
+                'size': 5
+            }),
         }
         
         labels = {
@@ -63,4 +72,6 @@ class BookForm(forms.ModelForm):
             'description': 'Описание',
             'year': 'Год издания',
             'price': 'Цена',
+            'image': 'Изображение книги',
+            'tags': 'Теги (можно выбрать несколько)',
         }

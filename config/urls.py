@@ -18,7 +18,9 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
-from Aboook.views import index, about, book_detail, contact, book_create, book_edit, register
+from django.conf import settings
+from django.conf.urls.static import static
+from Aboook.views import index, about, book_detail, contact, book_create, book_edit, register, books_by_tag
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -30,4 +32,8 @@ urlpatterns = [
     path('book/<int:pk>/edit/', book_edit, name='book_edit'),
     path('accounts/', include('django.contrib.auth.urls')),
     path('accounts/register/', register, name='register'),
+    path('tag/<int:tag_id>/', books_by_tag, name='books_by_tag'),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
