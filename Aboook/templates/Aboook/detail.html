@@ -9,9 +9,11 @@
             <div class="card shadow-sm border-0">
                 <div class="row g-0">
                     <div class="col-md-5">
-                        <img src="https://placehold.co/600x800/2c3e50/ffffff?text={{ book.title|urlencode }}" 
-                             class="img-fluid rounded-start" 
-                             alt="{{ book.title }}">
+                        {% if book.image %}
+                            <img src="{{ book.image.url }}" class="img-fluid rounded-start" alt="{{ book.title }}">
+                        {% else %}
+                            <img src="https://placehold.co/600x800/2c3e50/ffffff?text={{ book.title|urlencode }}" class="img-fluid rounded-start" alt="{{ book.title }}">
+                        {% endif %}
                     </div>
                     <div class="col-md-7">
                         <div class="card-body">
@@ -30,8 +32,23 @@
                                     <span class="badge bg-warning text-dark">{{ book.price }} ₽</span>
                                 {% endif %}
                             </p>
+                            
+                            {% if book.tags.all %}
+                                <p class="card-text">
+                                    <strong>Теги:</strong>
+                                    {% for tag in book.tags.all %}
+                                        <a href="{% url 'books_by_tag' tag.id %}" class="badge bg-secondary text-decoration-none">
+                                            {{ tag.name }}
+                                        </a>
+                                    {% endfor %}
+                                </p>
+                            {% endif %}
+                            
                             <p class="card-text">
                                 <strong>Дата добавления:</strong> {{ book.created_at|date:"d.m.Y H:i" }}
+                            </p>
+                            <p class="card-text">
+                                <strong>Владелец:</strong> {{ book.owner.username|default:"Неизвестен" }}
                             </p>
                             <hr>
                             <h5>Описание</h5>
@@ -41,9 +58,11 @@
                                 <a href="{% url 'home' %}" class="btn btn-outline-secondary">
                                     Назад к списку книг
                                 </a>
-                                <a href="{% url 'book_edit' book.pk %}" class="btn btn-warning">
-                                     Редактировать
-                                </a>
+                                {% if user == book.owner %}
+                                    <a href="{% url 'book_edit' book.pk %}" class="btn btn-warning">
+                                         Редактировать
+                                    </a>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
