@@ -1,7 +1,8 @@
 from django import forms
-from .models import Book  
-from django import forms
-from .models import Book, Tag 
+from .models import Book, Tag, Comment
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
+
 
 class FeedbackForm(forms.Form):
     subject = forms.CharField(
@@ -12,6 +13,7 @@ class FeedbackForm(forms.Form):
             'placeholder': 'Например: Вопрос о книге'
         })
     )
+    
     email = forms.EmailField(
         label='Ваш Email',
         widget=forms.EmailInput(attrs={
@@ -19,6 +21,7 @@ class FeedbackForm(forms.Form):
             'placeholder': 'example@mail.ru'
         })
     )
+    
     text = forms.CharField(
         label='Сообщение',
         widget=forms.Textarea(attrs={
@@ -75,3 +78,31 @@ class BookForm(forms.ModelForm):
             'image': 'Изображение книги',
             'tags': 'Теги (можно выбрать несколько)',
         }
+
+
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['text']
+        widgets = {
+            'text': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Напишите ваш комментарий...'
+            }),
+        }
+        labels = {
+            'text': '',
+        }
+
+
+class CustomUserCreationForm(UserCreationForm):
+    class Meta:
+        model = User
+        fields = ('username', 'password1', 'password2')
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name in self.fields:
+            self.fields[field_name].widget.attrs['class'] = 'form-control'
+            self.fields[field_name].widget.attrs['placeholder'] = self.fields[field_name].label

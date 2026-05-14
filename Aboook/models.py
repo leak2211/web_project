@@ -35,7 +35,6 @@ class Book(models.Model):
         blank=True,
         verbose_name='Владелец'
     )
-    
     image = models.ImageField(
         upload_to='books/%Y/%m/%d/',
         blank=True,
@@ -58,4 +57,29 @@ class Book(models.Model):
     class Meta:
         verbose_name = 'Книга'
         verbose_name_plural = 'Книги'
+        ordering = ['-created_at']
+
+
+class Comment(models.Model):
+    text = models.TextField(verbose_name='Текст комментария')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='comments',
+        verbose_name='Автор'
+    )
+    book = models.ForeignKey(
+        Book,
+        on_delete=models.CASCADE,
+        related_name='comments',
+        verbose_name='Книга'
+    )
+    
+    def __str__(self):
+        return f"Комментарий от {self.author.username} к {self.book.title}"
+    
+    class Meta:
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
         ordering = ['-created_at']
