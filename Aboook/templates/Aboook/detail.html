@@ -18,12 +18,8 @@
                     <div class="col-md-7">
                         <div class="card-body">
                             <h1 class="card-title">{{ book.title }}</h1>
-                            <p class="card-text">
-                                <strong>Автор:</strong> {{ book.author }}
-                            </p>
-                            <p class="card-text">
-                                <strong>Год издания:</strong> {{ book.year }}
-                            </p>
+                            <p class="card-text"><strong>Автор:</strong> {{ book.author }}</p>
+                            <p class="card-text"><strong>Год издания:</strong> {{ book.year }}</p>
                             <p class="card-text">
                                 <strong>Цена:</strong> 
                                 {% if book.price == 0 %}
@@ -44,28 +40,60 @@
                                 </p>
                             {% endif %}
                             
-                            <p class="card-text">
-                                <strong>Дата добавления:</strong> {{ book.created_at|date:"d.m.Y H:i" }}
-                            </p>
-                            <p class="card-text">
-                                <strong>Владелец:</strong> {{ book.owner.username|default:"Неизвестен" }}
-                            </p>
+                            <p class="card-text"><strong>Дата добавления:</strong> {{ book.created_at|date:"d.m.Y H:i" }}</p>
+                            <p class="card-text"><strong>Владелец:</strong> {{ book.owner.username|default:"Неизвестен" }}</p>
                             <hr>
                             <h5>Описание</h5>
                             <p class="card-text">{{ book.description }}</p>
                             
                             <div class="d-flex gap-2 mt-3">
                                 <a href="{% url 'home' %}" class="btn btn-outline-secondary">
-                                    Назад к списку книг
+                                    ← Назад к списку книг
                                 </a>
                                 {% if user == book.owner %}
                                     <a href="{% url 'book_edit' book.pk %}" class="btn btn-warning">
-                                         Редактировать
+                                        ✏ Редактировать
                                     </a>
                                 {% endif %}
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+            
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">Комментарии ({{ comments|length }})</h5>
+                </div>
+                <div class="card-body">
+                    {% if comments %}
+                        {% for comment in comments %}
+                            <div class="border-bottom pb-3 mb-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <strong class="text-primary">{{ comment.author.username }}</strong>
+                                    <small class="text-muted">{{ comment.created_at|date:"d.m.Y H:i" }}</small>
+                                </div>
+                                <p class="mt-2 mb-0">{{ comment.text }}</p>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center my-3">Пока нет комментариев. Будьте первым!</p>
+                    {% endif %}
+                    
+                    
+                    <hr>
+                    {% if user.is_authenticated %}
+                        <h6 class="mb-3">Добавить комментарий</h6>
+                        <form method="post" action="{% url 'add_comment' book.pk %}">
+                            {% csrf_token %}
+                            {{ comment_form }}
+                            <button type="submit" class="btn btn-warning mt-2">Отправить</button>
+                        </form>
+                    {% else %}
+                        <div class="alert alert-info text-center">
+                            <a href="{% url 'login' %}?next={{ request.path }}" class="alert-link">Войдите</a>, чтобы оставить комментарий.
+                        </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
