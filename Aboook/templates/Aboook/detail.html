@@ -48,11 +48,14 @@
                             
                             <div class="d-flex gap-2 mt-3">
                                 <a href="{% url 'home' %}" class="btn btn-outline-secondary">
-                                    ← Назад к списку книг
+                                    Назад к списку книг
                                 </a>
                                 {% if user == book.owner %}
                                     <a href="{% url 'book_edit' book.pk %}" class="btn btn-warning">
-                                        ✏ Редактировать
+                                         Редактировать
+                                    </a>
+                                    <a href="{% url 'book_delete' book.pk %}" class="btn btn-danger">
+                                         Удалить
                                     </a>
                                 {% endif %}
                             </div>
@@ -77,9 +80,8 @@
                             </div>
                         {% endfor %}
                     {% else %}
-                        <p class="text-muted text-center my-3">Пока нет комментариев. Будьте первым!</p>
+                        <p class="text-muted text-center my-3">Пока нет комментариев.</p>
                     {% endif %}
-                    
                     
                     <hr>
                     {% if user.is_authenticated %}
