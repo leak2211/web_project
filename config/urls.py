@@ -20,22 +20,24 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from Aboook.views import index, about, book_detail, contact, book_create, book_edit, register, books_by_tag
-
-from Aboook.views import index, about, book_detail, contact, book_create, book_edit, register, books_by_tag, add_comment
+from Aboook.views import (
+    BookListView, BookDetailView, BookCreateView, BookUpdateView, BookDeleteView,
+    AddCommentView, ContactView, RegisterView, BooksByTagView
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', index, name='home'),
-    path('about/', about, name='about'),
-    path('book/<int:pk>/', book_detail, name='book_detail'),
-    path('book/<int:pk>/comment/', add_comment, name='add_comment'),  
-    path('contact/', contact, name='contact'),
-    path('book/create/', book_create, name='book_create'),
-    path('book/<int:pk>/edit/', book_edit, name='book_edit'),
+    path('', BookListView.as_view(), name='home'),
+    path('about/', BookListView.as_view(), name='about'),
+    path('book/<int:pk>/', BookDetailView.as_view(), name='book_detail'),
+    path('book/<int:pk>/comment/', AddCommentView.as_view(), name='add_comment'),
+    path('contact/', ContactView.as_view(), name='contact'),
+    path('book/create/', BookCreateView.as_view(), name='book_create'),
+    path('book/<int:pk>/edit/', BookUpdateView.as_view(), name='book_edit'),
+    path('book/<int:pk>/delete/', BookDeleteView.as_view(), name='book_delete'),
     path('accounts/', include('django.contrib.auth.urls')),
-    path('accounts/register/', register, name='register'),
-    path('tag/<int:tag_id>/', books_by_tag, name='books_by_tag'),
+    path('accounts/register/', RegisterView.as_view(), name='register'),
+    path('tag/<int:tag_id>/', BooksByTagView.as_view(), name='books_by_tag'),
 ]
 
 if settings.DEBUG:

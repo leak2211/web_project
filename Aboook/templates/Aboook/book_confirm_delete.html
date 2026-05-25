@@ -1,0 +1,29 @@
+{% extends 'Aboook/base.html' %}
+
+{% block title %}Удаление книги - Aboook{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-6 mx-auto">
+            <div class="card shadow-sm">
+                <div class="card-header bg-danger text-white">
+                    <h3 class="mb-0">Удаление книги</h3>
+                </div>
+                <div class="card-body">
+                    <p class="lead">Вы уверены, что хотите удалить книгу <strong>"{{ book.title }}"</strong>?</p>
+                    <p class="text-danger">Это действие нельзя отменить.</p>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-danger"> Удалить</button>
+                            <a href="{% url 'book_detail' book.pk %}" class="btn btn-outline-secondary">Отмена</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

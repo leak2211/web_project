@@ -1,159 +1,161 @@
-from django.shortcuts import render, get_object_or_404, redirect
-from django.http import HttpResponseRedirect
-from django.contrib.auth import login as auth_login
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404
+from django.urls import reverse_lazy
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, FormView
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
+from django.contrib.auth import login as auth_login
 from .models import Book, Tag, Comment
-from .forms import FeedbackForm, BookForm, CommentForm, CustomUserCreationForm
+from .forms import BookForm, CommentForm, CustomUserCreationForm, FeedbackForm
 
 
-def index(request):
-    books = Book.objects.all()
-    context = {
-        'title': 'Главная страница',
-        'welcome_text': 'Aboook - обменивайтесь книгами',
-        'books': books,
-    }
-    return render(request, 'Aboook/index.html', context)
-
-def about(request):
-    context = {
-        'title': 'О нас',
-    }
-    return render(request, 'Aboook/about.html', context)
-
-def book_detail(request, pk):
-    book = get_object_or_404(Book, pk=pk)
-    comments = book.comments.all()  
-    comment_form = CommentForm()
+class BookListView(ListView):
+    model = Book
+    template_name = 'Aboook/index.html'
+    context_object_name = 'books'
+    ordering = ['-created_at']
     
-    context = {
-        'title': book.title,
-        'book': book,
-        'comments': comments,
-        'comment_form': comment_form,
-    }
-    return render(request, 'Aboook/detail.html', context)
-
-def contact(request):
-    if request.method == 'POST':
-        form = FeedbackForm(request.POST)
-        if form.is_valid():
-            print('=' * 50)
-            print('НОВОЕ СООБЩЕНИЕ ОТ ПОЛЬЗОВАТЕЛЯ:')
-            print(f'Тема: {form.cleaned_data["subject"]}')
-            print(f'Email: {form.cleaned_data["email"]}')
-            print(f'Сообщение: {form.cleaned_data["text"]}')
-            print('=' * 50)
-            messages.success(request, 'Ваше сообщение успешно отправлено! Мы ответим вам в ближайшее время.')
-            return redirect('contact')
-        else:
-            messages.error(request, 'Ошибка при отправке сообщения. Проверьте заполнение полей.')
-    else:
-        form = FeedbackForm()
-    
-    context = {
-        'title': 'Контакты',
-        'form': form,
-    }
-    return render(request, 'Aboook/contact.html', context)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Главная страница'
+        context['welcome_text'] = 'Aboook - обменивайтесь книгами'
+        return context
 
 
-@login_required
-def book_create(request):
-    if request.method == 'POST':
-        form = BookForm(request.POST, request.FILES)
-        if form.is_valid():
-            book = form.save(commit=False)
-            book.owner = request.user
-            book.save()
-            form.save_m2m()
-            messages.success(request, f'Книга "{book.title}" успешно добавлена!')
-            return redirect('book_detail', pk=book.pk)
-        else:
-            messages.error(request, 'Ошибка при добавлении книги. Проверьте заполнение полей.')
-    else:
-        form = BookForm()
+class BookDetailView(DetailView):
+    model = Book
+    template_name = 'Aboook/detail.html'
+    context_object_name = 'book'
     
-    context = {
-        'title': 'Добавление книги',
-        'form': form,
-        'button_text': 'Добавить книгу',
-    }
-    return render(request, 'Aboook/book_form.html', context)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = self.object.title
+        context['comments'] = self.object.comments.all()
+        context['comment_form'] = CommentForm()
+        return context
 
-@login_required
-def book_edit(request, pk):
-    book = get_object_or_404(Book, pk=pk)
-    
-    if book.owner != request.user:
-        messages.error(request, 'Вы не можете редактировать эту книгу.')
-        return redirect('book_detail', pk=pk)
-    
-    if request.method == 'POST':
-        form = BookForm(request.POST, request.FILES, instance=book)
-        if form.is_valid():
-            book = form.save()
-            messages.success(request, f'Книга "{book.title}" успешно обновлена!')
-            return redirect('book_detail', pk=book.pk)
-        else:
-            messages.error(request, 'Ошибка при обновлении книги. Проверьте заполнение полей.')
-    else:
-        form = BookForm(instance=book)
-    
-    context = {
-        'title': 'Редактирование книги',
-        'form': form,
-        'button_text': 'Сохранить изменения',
-        'book': book,
-    }
-    return render(request, 'Aboook/book_form.html', context)
 
-def register(request):
-    if request.method == 'POST':
-        form = CustomUserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            auth_login(request, user)
-            messages.success(request, f'Добро пожаловать, {user.username}! Регистрация прошла успешно.')
-            return redirect('home')
-        else:
-            messages.error(request, 'Ошибка при регистрации. Проверьте введенные данные.')
-    else:
-        form = CustomUserCreationForm()
-        for field_name in form.fields:
-            form.fields[field_name].widget.attrs['class'] = 'form-control'
+class BookCreateView(LoginRequiredMixin, CreateView):
+    model = Book
+    form_class = BookForm
+    template_name = 'Aboook/book_form.html'
     
-    context = {
-        'title': 'Регистрация',
-        'form': form,
-    }
-    return render(request, 'registration/register.html', context)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Добавление книги'
+        context['button_text'] = 'Добавить книгу'
+        return context
+    
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        messages.success(self.request, f'Книга "{form.instance.title}" успешно добавлена!')
+        return super().form_valid(form)
+    
+    def get_success_url(self):
+        return reverse_lazy('book_detail', kwargs={'pk': self.object.pk})
 
-def books_by_tag(request, tag_id):
-    tag = get_object_or_404(Tag, pk=tag_id)
-    books = tag.books.all()
-    context = {
-        'title': f'Книги с тегом: {tag.name}',
-        'books': books,
-        'current_tag': tag,
-    }
-    return render(request, 'Aboook/index.html', context)
 
-@login_required
-def add_comment(request, pk):
-    book = get_object_or_404(Book, pk=pk)
+class BookUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Book
+    form_class = BookForm
+    template_name = 'Aboook/book_form.html'
     
-    if request.method == 'POST':
-        form = CommentForm(request.POST)
-        if form.is_valid():
-            comment = form.save(commit=False)
-            comment.author = request.user
-            comment.book = book
-            comment.save()
-            messages.success(request, 'Ваш комментарий успешно добавлен!')
-        else:
-            messages.error(request, 'Ошибка при добавлении комментария. Пожалуйста, попробуйте снова.')
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Редактирование книги'
+        context['button_text'] = 'Сохранить изменения'
+        return context
     
-    return redirect('book_detail', pk=book.pk)
+    def test_func(self):
+        book = self.get_object()
+        return self.request.user == book.owner
+    
+    def form_valid(self, form):
+        messages.success(self.request, f'Книга "{form.instance.title}" успешно обновлена!')
+        return super().form_valid(form)
+    
+    def get_success_url(self):
+        return reverse_lazy('book_detail', kwargs={'pk': self.object.pk})
+
+
+class BookDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Book
+    template_name = 'Aboook/book_confirm_delete.html'
+    success_url = reverse_lazy('home')
+    
+    def test_func(self):
+        book = self.get_object()
+        return self.request.user == book.owner
+    
+    def delete(self, request, *args, **kwargs):
+        book = self.get_object()
+        messages.success(request, f'Книга "{book.title}" успешно удалена!')
+        return super().delete(request, *args, **kwargs)
+
+
+class AddCommentView(LoginRequiredMixin, CreateView):
+    model = Comment
+    form_class = CommentForm
+    http_method_names = ['post']
+    
+    def form_valid(self, form):
+        book = get_object_or_404(Book, pk=self.kwargs['pk'])
+        form.instance.author = self.request.user
+        form.instance.book = book
+        messages.success(self.request, 'Ваш комментарий успешно добавлен!')
+        return super().form_valid(form)
+    
+    def get_success_url(self):
+        return reverse_lazy('book_detail', kwargs={'pk': self.kwargs['pk']})
+
+
+class ContactView(FormView):
+    template_name = 'Aboook/contact.html'
+    form_class = FeedbackForm
+    success_url = reverse_lazy('contact')
+    
+    def form_valid(self, form):
+        print('=' * 50)
+        print('НОВОЕ СООБЩЕНИЕ ОТ ПОЛЬЗОВАТЕЛЯ:')
+        print(f'Тема: {form.cleaned_data["subject"]}')
+        print(f'Email: {form.cleaned_data["email"]}')
+        print(f'Сообщение: {form.cleaned_data["text"]}')
+        print('=' * 50)
+        messages.success(self.request, 'Ваше сообщение успешно отправлено! Мы ответим вам в ближайшее время.')
+        return super().form_valid(form)
+    
+    def form_invalid(self, form):
+        messages.error(self.request, 'Ошибка при отправке сообщения. Проверьте заполнение полей.')
+        return super().form_invalid(form)
+
+
+class RegisterView(CreateView):
+    template_name = 'registration/register.html'
+    form_class = CustomUserCreationForm
+    success_url = reverse_lazy('home')
+    
+    def form_valid(self, form):
+        user = form.save()
+        auth_login(self.request, user)
+        messages.success(self.request, f'Добро пожаловать, {user.username}! Регистрация прошла успешно.')
+        return super().form_valid(form)
+    
+    def form_invalid(self, form):
+        messages.error(self.request, 'Ошибка при регистрации. Проверьте введенные данные.')
+        return super().form_invalid(form)
+
+
+class BooksByTagView(ListView):
+    model = Book
+    template_name = 'Aboook/index.html'
+    context_object_name = 'books'
+    
+    def get_queryset(self):
+        tag = get_object_or_404(Tag, pk=self.kwargs['tag_id'])
+        return tag.books.all()
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        tag = get_object_or_404(Tag, pk=self.kwargs['tag_id'])
+        context['title'] = f'Книги с тегом: {tag.name}'
+        context['welcome_text'] = f'Книги с тегом "{tag.name}"'
+        return context
